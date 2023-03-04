@@ -1,4 +1,4 @@
-# Jira Issue Transitions - Github Action
+# Jira Issue Transition - Github Action
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/frieder/jira-issue-transition/ci-build.yml?label=Build%20Status)](https://github.com/frieder/jira-issue-transition/actions/workflows/ci-build.yml)
 [![Sonar Coverage](https://img.shields.io/sonar/coverage/frieder_jira-issue-transition/main?server=https%3A%2F%2Fsonarcloud.io&label=Code%20Coverage)](https://sonarcloud.io/project/overview?id=frieder_jira-issue-transition)
@@ -134,6 +134,15 @@ between the requests.
 
 The time (in milliseconds) the action will wait for a request to finish. If the request does not finish in
 time it will be considered failed.
+
+### Option: issue
+
+|          |     |
+| :------- | :-- |
+| Required | yes |
+| Default  |     |
+
+The ID of the Jira ticket (e.g. XYZ-123).
 
 ### Option: transition
 
