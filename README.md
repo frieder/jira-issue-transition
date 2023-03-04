@@ -31,7 +31,7 @@ jobs:
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
       - name: Transition Issue
-        uses: frieder/jira-issue-transitions@v1
+        uses: frieder/jira-issue-transition@v1
         with:
           retries: 1 # optional
           retryDelay: 10 # optional
@@ -96,7 +96,7 @@ steps:
   - name: Transition Issue To 'In Progress'
     # is only executed when the ticket is not in 'In Progress' state already
     if: fromJSON(steps.issue.outputs.json).fields.status.name != 'In Progress'
-    uses: frieder/jira-issue-transitions@v1
+    uses: frieder/jira-issue-transition@v1
     with:
       issue: XYZ-123
       transition: 42
