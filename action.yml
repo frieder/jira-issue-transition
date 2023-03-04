@@ -1,4 +1,4 @@
-name: Transition Jira Issue
+name: Jira Issue Transitions
 description: Transitions Jira issues from one state to another and allows to update fields while doing so.
 author: frieder
 branding:
