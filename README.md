@@ -1,4 +1,4 @@
-# Jira Issue Transition - Github Action
+# Jira Issue Transitions - Github Action
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/frieder/jira-issue-transition/ci-build.yml?label=Build%20Status)](https://github.com/frieder/jira-issue-transition/actions/workflows/ci-build.yml)
 [![Sonar Coverage](https://img.shields.io/sonar/coverage/frieder_jira-issue-transition/main?server=https%3A%2F%2Fsonarcloud.io&label=Code%20Coverage)](https://sonarcloud.io/project/overview?id=frieder_jira-issue-transition)
@@ -31,7 +31,7 @@ jobs:
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
       - name: Transition Issue
-        uses: frieder/jira-issue-transition@v1
+        uses: frieder/jira-issue-transitions@v1
         with:
           retries: 1 # optional
           retryDelay: 10 # optional
@@ -96,7 +96,7 @@ steps:
   - name: Transition Issue To 'In Progress'
     # is only executed when the ticket is not in 'In Progress' state already
     if: fromJSON(steps.issue.outputs.json).fields.status.name != 'In Progress'
-    uses: frieder/jira-issue-transition@v1
+    uses: frieder/jira-issue-transitions@v1
     with:
       issue: XYZ-123
       transition: 42
