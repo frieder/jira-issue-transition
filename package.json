@@ -20,7 +20,7 @@
     "devDependencies": {
         "@types/node": "^16.18.14",
         "@typescript-eslint/eslint-plugin": "^5.54.0",
-        "esbuild": "0.17.11",
+        "esbuild": "0.17.14",
         "eslint": "^8.35.0",
         "eslint-config-prettier": "^8.6.0",
         "prettier": "^2.8.4",
