@@ -1,58 +1,52 @@
 import { ActionInputs, JiraLogin } from "./types";
-import * as core from "@actions/core";
+import { getBooleanInput, getInput, getMultilineInput, InputOptions } from "@actions/core";
 import * as fs from "fs";
 import * as YAML from "yaml";
 
+const inputOpts: InputOptions = { required: false, trimWhitespace: true };
+
 export function getLoginData(): JiraLogin {
     const configPath = `${process.env.HOME}/jira/config.yml`;
-    const login: JiraLogin = YAML.parse(fs.readFileSync(configPath, "utf8"));
-
-    _verifyLogin(login);
-
-    return login;
+    return YAML.parse(fs.readFileSync(configPath, "utf8"));
 }
 
 export function getInputs(): ActionInputs {
-    const inputs: ActionInputs = {
+    let issue: string[] = [];
+    let delim = "";
+
+    const rawIssue = getMultilineInput("issue", { ...inputOpts, required: true });
+    if (rawIssue.length === 1) {
+        issue = rawIssue[0].split(",").map((str) => str.trim());
+        delim = rawIssue[0].includes(",") ? "," : "";
+    } else {
+        issue = rawIssue.map((str) => str.trim());
+        delim = "\n";
+    }
+
+    return {
         retries: _getNumber("retries", 1),
         retryDelay: _getNumber("retryDelay", 10),
         timeout: _getNumber("timeout", 2000),
-        issue: core.getInput("issue", { required: true }),
-        transition: core.getInput("transition", { required: true }),
-        summary: core.getInput("summary", { required: false }),
-        description: core.getInput("description", { required: false }),
-        assignee: core.getInput("assignee", { required: false }),
-        priority: core.getInput("priority", { required: false }),
-        duedate: core.getInput("duedate", { required: false }),
-        components: core.getMultilineInput("components", { required: false }),
-        fixversions: core.getMultilineInput("fixversions", { required: false }),
-        labels: core.getMultilineInput("labels", { required: false }),
-        customfields: core.getMultilineInput("customfields", { required: false }),
-        resolution: core.getInput("resolution", { required: false }),
-        comment: core.getInput("comment", { required: false }),
+        failOnError: getBooleanInput("failOnError", inputOpts),
+        issue: issue,
+        transition: getInput("transition", { ...inputOpts, required: true }),
+        summary: getInput("summary", inputOpts),
+        description: getInput("description", inputOpts),
+        assignee: getInput("assignee", inputOpts),
+        priority: getInput("priority", inputOpts),
+        duedate: getInput("duedate", inputOpts),
+        components: getMultilineInput("components", inputOpts),
+        fixversions: getMultilineInput("fixversions", inputOpts),
+        labels: getMultilineInput("labels", inputOpts),
+        customfields: getMultilineInput("customfields", inputOpts),
+        resolution: getInput("resolution", inputOpts),
+        comment: getInput("comment", inputOpts),
+        issueDelimiter: delim,
     };
-
-    if (!inputs.issue || inputs.issue.length === 0) {
-        throw new Error("The issue property must be set.");
-    }
-
-    if (!inputs.transition || inputs.transition.length === 0) {
-        throw new Error("The transition property must be set.");
-    }
-
-    return inputs;
-}
-
-function _verifyLogin(login: JiraLogin) {
-    if (!login.baseUrl || !login.email || !login.token) {
-        throw new Error(
-            "All login properties must be set. Do you use the jira-login action properly?"
-        );
-    }
 }
 
 function _getNumber(name: string, defaultValue: number): number {
-    const value = core.getInput(name, { required: false });
+    const value = getInput(name, inputOpts);
     if (!value || value.length === 0) {
         return defaultValue;
     }

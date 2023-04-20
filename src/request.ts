@@ -2,14 +2,8 @@ import { ActionInputs, JiraLogin } from "./types";
 import axios, { AxiosInstance } from "axios";
 import axiosRetry from "axios-retry";
 
-export async function sendRequest(jira: JiraLogin, inputs: ActionInputs, payload: any) {
-    const httpClient = _createHTTPClient(jira, inputs);
-    _setRetrySettings(httpClient, inputs);
-    await httpClient.post(`/rest/api/3/issue/${inputs.issue}/transitions`, payload);
-}
-
-function _createHTTPClient(jira: JiraLogin, inputs: ActionInputs): AxiosInstance {
-    return axios.create({
+export function createHTTPClient(jira: JiraLogin, inputs: ActionInputs): AxiosInstance {
+    const httpClient: AxiosInstance = axios.create({
         baseURL: jira.baseUrl,
         auth: {
             username: jira.email,
@@ -21,9 +15,7 @@ function _createHTTPClient(jira: JiraLogin, inputs: ActionInputs): AxiosInstance
         },
         timeout: inputs.timeout,
     });
-}
 
-function _setRetrySettings(httpClient: AxiosInstance, inputs: ActionInputs) {
     axiosRetry(httpClient, {
         retries: inputs.retries,
         retryCondition: () => true,
@@ -35,4 +27,30 @@ function _setRetrySettings(httpClient: AxiosInstance, inputs: ActionInputs) {
             );
         },
     });
+
+    return httpClient;
+}
+
+export async function determineTransitionID(
+    httpClient: AxiosInstance,
+    issue: string,
+    transition: string
+) {
+    if (transition.match(/^\d+$/)) {
+        return Number(transition);
+    }
+
+    const response = await httpClient.get(`/rest/api/3/issue/${issue}/transitions`);
+
+    for (const entry of response.data.transitions) {
+        if (entry.name === transition) {
+            return entry.id;
+        }
+    }
+
+    throw new Error(`Cannot find a transition with name [${transition}] for Jira issue [${issue}]`);
+}
+
+export async function transitionIssue(httpClient: AxiosInstance, issue: string, payload: any) {
+    await httpClient.post(`/rest/api/3/issue/${issue}/transitions`, payload);
 }

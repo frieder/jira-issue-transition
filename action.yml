@@ -17,11 +17,16 @@ inputs:
     description: The time in milliseconds in which a request must finish or otherwise considered failed.
     required: false
     default: 2000
+  failOnError:
+    description: Should the action report back as failed when at least one issue cannot be updated.
+    type: boolean
+    required: false
+    default: true
   issue:
     description: The ID of the Jira issue.
     required: true
   transition:
-    description: The name of the ID of the Jira transition.
+    description: The name or ID of the Jira transition.
     required: true
   summary:
     description: The title (summary) of the Jira ticket.
