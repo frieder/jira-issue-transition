@@ -1,10 +1,10 @@
 import { ActionInputs, Entry, GroupedEntries } from "./types";
 
-export function createPayload(inputs: ActionInputs): any {
+export function createPayload(inputs: ActionInputs, transactionId: number): any {
     const payload = {
         fields: {},
         update: {},
-        transition: { id: Number(inputs.transition) },
+        transition: { id: transactionId },
     };
 
     _addSummary(inputs.summary, payload);

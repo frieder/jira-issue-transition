@@ -33,46 +33,54 @@ jobs:
       - name: Transition Issue
         uses: frieder/jira-issue-transition@v1
         with:
-          retries: 1 # optional
-          retryDelay: 10 # optional
-          timeout: 2000 # optional
+          retries: 1
+          retryDelay: 10
+          timeout: 2000
+          failOnError: true
+          # Either one of the following three formats for 'issue' is valid (spaces are trimmed)
           issue: XYZ-123
+          issue: XYZ-1, XYZ-2
+          issue: |
+            XYZ-1
+            XYZ-2
+          # Either one of the following two formats for 'transition' is valid 
+          transition: In Progress
           transition: 21
           # following are properties that can be set if defined in the transition screen & required by validator
-          assignee: 123456:12345678-abcd-abcd-abcd-1234567890ab # optional
-          comment: Some plaintext comment # optional
-          components: | # optional
+          assignee: 123456:12345678-abcd-abcd-abcd-1234567890ab
+          comment: Plaintext only
+          components: |
             = component1
             = component2
             + component3
             - component2
-          customfields: | # optional
+          customfields: |
             10050: some value
             10051: 2023-01-01
             10052: https://github.com/marketplace?type=action
-          description: Plaintext only # optional
-          duedate: 2023-02-01 # optional
-          fixversions: | # optional
+          description: Plaintext only
+          duedate: 2023-02-01
+          fixversions: |
             = 1.0
             = 1.1
             + 2.0
             - 1.1
-          labels: | # optional
+          labels: |
             = foo
             = foo2
             = bar2
             + bar
             - foo2
             - bar2
-          priority: Lowest # optional
-          resolution: Won't Do # optional
-          summary: Some new fancy title # optional
+          priority: Lowest
+          resolution: Won't Do
+          summary: Some new fancy title
 ```
 
 ## Conditional Transition
 
 The action is always executed regardless of whether the issue is already in the target state. It is however possible
-to prevent a transition from being applied based on the current state of the ticket. To do this you can use the 
+to prevent a transition from being applied based on the current state of the ticket. To do this you can use the
 [jira-issue-info](https://github.com/marketplace/actions/jira-issue-info) action to pull the information from the
 ticket and then apply conditions on the transition steps. Following is an example how this can be done.
 
@@ -99,7 +107,7 @@ steps:
     uses: frieder/jira-issue-transition@v1
     with:
       issue: XYZ-123
-      transition: 42
+      transition: Start Work | 42
 ```
 
 
@@ -135,6 +143,23 @@ between the requests.
 The time (in milliseconds) the action will wait for a request to finish. If the request does not finish in
 time it will be considered failed.
 
+### Option: failOnError
+
+|          |      |
+| :------- |:-----|
+| Required | no   |
+| Default  | true |
+
+When set to true (default) the action will report back as failed whenever at least one issue could not be
+transitioned. When set to false it means the action will never fail regardless of whether there are failed
+issue transitions. For the latter case the action will register outputs with additional information about
+which issues failed and which were transitioned successfully. Also see the output section at the end of this
+readme.
+
+> The option failOnError is only covering the actual API requests to transition the defined tickets. If it
+> is set to false and an error occurs outside the requests (e.g. when reading the inputs from the workflow
+> file), the action will still fail.
+
 ### Option: issue
 
 |          |     |
@@ -151,10 +176,15 @@ The ID of the Jira ticket (e.g. XYZ-123).
 | Required | yes |
 | Default  |     |
 
-The ID of the transition that should be applied to the Jira issue.
+The ID or the name of the transition that should be applied to the Jira issue.
+
+> The benefit of using the name of a transition over its ID is that different workflows are supported.
+> However the action will then query the transition ID for each issue separately which results in
+> additional requests that slow down the execution time and increase the chances for the action to
+> fail. When the transition ID is immutable (same workflow for all issues) consider using the
+> transition ID directly over the name (speed and robustness over convenience).
 
 > To get the ID of a transition check the workflow in text mode or check the [REST API](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-transitions-get).
-> The action doesn't currently support to define a transition by its name.
 
 ### Option: summary
 
@@ -328,3 +358,17 @@ with their associated value, separated by a colon (`:`). One entry per line.
 > interpreted as a delimiter.
 
 The option is ignored when blank.
+
+## Outputs
+
+This action provides some information via outputs for post-processing. Following is an overview of the keys
+registered with the action's output.
+
+1. `hasErrors` - A boolean value indicating whether there are issues that have not been updated successfully.
+   This is useful when the failOnError option is set to false and one still wants to check if there
+   have been failed transition attempts (e.g. for reporting back to MSTeams or Slack).
+2. `successful` - A list of IDs of issues that have successfully been updated. The format is the same as used
+   with the issues option (either comma or line separated).
+3. `failed` - A list of IDs of issues that failed to get updated. This may be useful to add comments to the tickets
+   in question or to report those tickets to a Slack or MSTeams channel. The format is again the same as
+   with the issues option.
