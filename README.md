@@ -11,6 +11,31 @@ to successfully pass the transition.
 > -   Only supports Jira Cloud.
 > -   Requires [Jira Login Action](https://github.com/marketplace/actions/jira-login).
 
+## Release Notes
+
+<table>
+  <tr>
+    <th>Version</th>
+    <th>Content</th>
+  </tr>
+  <tr>
+    <td>v1.1.0</td>
+    <td>
+      New features:
+      <ul>
+        <li>Support for multi issue transition</li>
+        <li>Refer to a transition by name or ID</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>v1.0.0</td>
+    <td>Initial version of the action, adds support to transition a Jira issue</td>
+  </tr>
+</table>
+
+> The version `v1` always points to the latest version with the same major version.
+
 ## Usage
 
 ```yaml
