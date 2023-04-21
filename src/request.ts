@@ -40,7 +40,9 @@ export async function determineTransitionID(
         return Number(transition);
     }
 
-    const response = await httpClient.get(`/rest/api/3/issue/${issue}/transitions`);
+    const response = await httpClient.get(
+        `/rest/api/3/issue/${issue}/transitions?includeUnavailableTransitions=true`
+    );
 
     for (const entry of response.data.transitions) {
         if (entry.name === transition) {
