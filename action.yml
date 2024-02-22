@@ -62,5 +62,5 @@ inputs:
     description: A resolution to be set on the Jira issue upon transition.
     required: false
 runs:
-  using: node16
+  using: node20
   main: ./dist/index.js

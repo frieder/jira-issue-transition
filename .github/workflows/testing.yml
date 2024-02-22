@@ -1,0 +1,33 @@
+#
+# This workflow file is used for testing during local development with the help of
+# https://github.com/nektos/act.
+#
+
+name: Test GH Action
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test Action
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login
+        uses: atlassian/gajira-login@v3
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_URL }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_TOKEN }}
+
+      - name: Transition Issue
+        uses: ./
+        with:
+          retries: 1
+          retryDelay: 10
+          timeout: 2000
+          failOnError: true
+          issue: ${{ vars.JIRA_ISSUES }}
+          transition: In Progress

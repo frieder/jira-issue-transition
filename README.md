@@ -11,31 +11,6 @@ to successfully pass the transition.
 > -   Only supports Jira Cloud.
 > -   Requires [Jira Login Action](https://github.com/marketplace/actions/jira-login).
 
-## Release Notes
-
-<table>
-  <tr>
-    <th>Version</th>
-    <th>Content</th>
-  </tr>
-  <tr>
-    <td>v1.1.0</td>
-    <td>
-      New features:
-      <ul>
-        <li>Support for multi issue transition</li>
-        <li>Refer to a transition by name or ID</li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td>v1.0.0</td>
-    <td>Initial version of the action, adds support to transition a Jira issue</td>
-  </tr>
-</table>
-
-> The version `v1` always points to the latest version with the same major version.
-
 ## Usage
 
 ```yaml
@@ -397,3 +372,18 @@ registered with the action's output.
 3. `failed` - A list of IDs of issues that failed to get updated. This may be useful to add comments to the tickets
    in question or to report those tickets to a Slack or MSTeams channel. The format is again the same as
    with the issues option.
+
+## Test Action
+
+This action can be tested during development with the use of https://github.com/nektos/act.
+
+Please adapt the values accordingly both in the workflow file and in the CLI command.
+
+```
+act -W .github/workflows/testing.yml \
+    -j test \
+    -s JIRA_URL=*** \
+    -s JIRA_EMAIL=*** \
+    -s JIRA_TOKEN=*** \
+    --var JIRA_ISSUES=WEB-123
+```
