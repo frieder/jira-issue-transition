@@ -1,0 +1,75 @@
+# A workflow that is triggered by both regular and dependabot PRs.
+# Be aware that dependabot uses its own secret store.
+
+name: Pull Request Check
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check:
+    name: Test Action
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install NPM Libs
+        run: npm i
+
+      - name: Run Format Check
+        run: npm run format-check
+
+      - name: Run Linter
+        run: npm run lint
+
+      - name: Build Code
+        run: npm run build
+
+      - name: Jira Login
+        uses: frieder/gha-jira-login@v1
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_URL }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_TOKEN }}
+
+      - name: Jira Issue Info
+        id: issue
+        uses: frieder/jira-issue-info@v1
+        with:
+          issue: GHA-1
+
+      - name: Transition Issue To In Progress
+        if: steps.issue.outputs.status != 'In Progress'
+        uses: ./
+        with:
+          issue: GHA-1
+          transition: In Progress
+
+      - name: Transition Issue To In Review
+        if: steps.issue.outputs.status == 'In Progress'
+        uses: ./
+        with:
+          issue: GHA-1
+          transition: In Review
+
+      - name: Merge PR
+        if: github.event_name == 'pull_request' && github.actor == 'dependabot[bot]'
+        run: gh pr merge --auto --merge --delete-branch "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
